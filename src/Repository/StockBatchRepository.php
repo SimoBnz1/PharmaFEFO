@@ -1,7 +1,7 @@
 <?php
-// src/Repository/StockBatchRepository.php
+
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/MouvementRepository.php'; // N-importiw l-MouvementRepository
+require_once __DIR__ . '/MouvementRepository.php';
 
 class StockBatchRepository {
     private PDO $db;
@@ -9,14 +9,13 @@ class StockBatchRepository {
 
     public function __construct() {
         $this->db = Database::getConnection();
-        $this->mouvementRepo = new MouvementRepository(); // Instanciation dyal repo l-mouvements
+        $this->mouvementRepo = new MouvementRepository(); 
     }
 
     public function getAllProducts() {
         return $this->db->query("SELECT * FROM produits ORDER BY nom ASC")->fetchAll();
     }
 
-    // US 1.1 : Saisie Lot + Entrée Mouvement via MouvementRepository
     public function saveInputBatch($productId, $lotNumber, $quantity, $expiryDate) {
         try {
             $this->db->beginTransaction();
@@ -28,7 +27,7 @@ class StockBatchRepository {
             $stmt->execute([$productId, $lotNumber, $quantity, $expiryDate]);
             $lotId = $this->db->lastInsertId();
 
-            // Appel au MouvementRepository nishan s7sb l-principes SOLID
+          
             $this->mouvementRepo->logMouvement($lotId, 'ENTREE', $quantity);
 
             $this->db->commit();
@@ -73,7 +72,7 @@ class StockBatchRepository {
         return $result ? $result : null;
     }
 
-    // US 3.1 : Dispense FEFO + Sortie Mouvement via MouvementRepository
+  
     public function dispenseBatch($batchId, $quantity) {
         try {
             $this->db->beginTransaction();
@@ -83,7 +82,7 @@ class StockBatchRepository {
             ");
             $stmt->execute([$quantity, $batchId]);
 
-            // Appel au MouvementRepository 
+           
             $this->mouvementRepo->logMouvement($batchId, 'SORTIE', $quantity);
 
             $this->db->commit();
